@@ -1,17 +1,22 @@
-## How to Use
 
-1. Click the button below:
+## 📥 روش استفاده
 
-   [![Request File Download](https://img.shields.io/badge/Download%20New%20File-Submit%20Request-blue?style=for-the-badge&logo=github)](https://github.com/Delta-Kronecker/Downloader/issues/new?template=download-request.md)
-2. On the page that opens, enter the direct download link of your file in the "Add a description"
-box.
-3. Click **Creat**.
-4. Wait a moment for the bot to download the file.
-5. The final download link will be sent in response to the same Issue.
+۱. روی دکمه زیر کلیک کنید:
+
+   [![ثبت درخواست دانلود](https://img.shields.io/badge/📥%20ثبت%20درخواست%20دانلود-کلیک%20کنید-blue?style=for-the-badge&logo=github)](https://github.com/Delta-Kronecker/Downloader/issues/new?template=download-request.md)
+
+۲. در صفحه‌ای که باز می‌شود، لینک مستقیم دانلود فایل خود را در کادر "Add a description
+" وارد کنید.
+
+۳. روی دکمه **Create** کلیک کنید.
+
+۴. کمی صبر کنید تا ربات فایل را دانلود کند.
+
+۵. لینک دانلود نهایی در پاسخ همان Issue برای شما ارسال می‌شود.
 
 
-## Important Notes
+## ❗ نکات مهم
 
-- The link must be direct.
-- Maximum file size: 100 MB.
-- Downloaded files are automatically deleted at the end of each day.
+- لینک باید مستقیم باشد.
+- حداکثر حجم فایل: ۱۰۰ مگابایت.
+- فایل‌های دانلود شده به‌طور خودکار پایان هر روز حذف می‌شوند.
