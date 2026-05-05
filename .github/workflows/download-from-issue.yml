@@ -21,6 +21,7 @@ jobs:
         uses: actions/checkout@v4
         with:
           fetch-depth: 0
+          ref: main
 
       - name: Extract URL from Issue
         id: get-url
@@ -38,7 +39,7 @@ jobs:
             exit 0
           fi
           
-          echo "url=$URL" >> $GITHUB_OUTPUT
+          echo "download_url=$URL" >> $GITHUB_OUTPUT
           echo "Link extracted: $URL"
 
       - name: Create downloads folder
@@ -48,10 +49,11 @@ jobs:
       - name: Download file
         id: download-file
         if: steps.get-url.outputs.skip != 'true'
+        env:
+          DOWNLOAD_URL: ${{ steps.get-url.outputs.download_url }}
         run: |
-          URL="${{ steps.get-url.outputs.url }}"
+          URL="${DOWNLOAD_URL}"
           
-          # Extract filename safely using parameter expansion
           FILENAME="${URL##*/}"
           FILENAME="${FILENAME%%\?*}"
           
@@ -59,7 +61,7 @@ jobs:
             FILENAME="download_$(date +%s)"
           fi
 
-          if [ -f "downloads/$FILENAME" ]; then
+          if [ -f "downloads/${FILENAME}" ]; then
             BASE="${FILENAME%.*}"
             EXT="${FILENAME##*.}"
             COUNTER=1
@@ -69,40 +71,42 @@ jobs:
             FILENAME="${BASE}_${COUNTER}.${EXT}"
           fi
 
-          echo "Downloading file as: $FILENAME"
-          curl -L -f --retry 5 --retry-delay 5 -A "GitHub-Actions-Downloader/1.0" -o "downloads/${FILENAME}" "${URL}"
+          echo "Downloading file as: ${FILENAME}"
+          curl -L -f --retry 5 --retry-delay 5 \
+            -A "GitHub-Actions-Downloader/1.0" \
+            -o "downloads/${FILENAME}" \
+            "${URL}"
 
           if [ $? -ne 0 ]; then
-            echo "::error::Download failed."
+            echo "::error::Download failed for ${URL}"
             exit 1
           fi
 
           echo "filename=${FILENAME}" >> $GITHUB_OUTPUT
-          echo "Download successful."
+          echo "Download successful: ${FILENAME}"
 
       - name: Commit and push file
         if: steps.download-file.outputs.filename != ''
+        env:
+          FILENAME: ${{ steps.download-file.outputs.filename }}
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
           
-          for i in $(seq 1 3); do
-            git pull --rebase origin main && break || sleep 3
-          done
-          
-          git add downloads/
+          git add "downloads/${FILENAME}"
           
           if git diff --cached --quiet; then
             echo "No changes to commit."
-          else
-            git commit -m "Download: ${{ steps.download-file.outputs.filename }}"
-            
-            for i in $(seq 1 5); do
-              git pull --rebase origin main && git push && break || sleep 5
-            done
-            
-            echo "File successfully saved to repository."
+            exit 0
           fi
+          
+          git commit -m "Download: ${FILENAME}"
+          
+          for i in $(seq 1 5); do
+            git pull --rebase origin main && git push && break || sleep 3
+          done
+          
+          echo "File successfully saved: ${FILENAME}"
 
       - name: Comment download link on Issue
         if: steps.download-file.outputs.filename != ''
@@ -110,24 +114,25 @@ jobs:
         with:
           issue-number: ${{ github.event.issue.number }}
           body: |
-            ## File downloaded successfully!
+            ## ✅ File downloaded successfully!
 
-            Filename: ${{ steps.download-file.outputs.filename }}
+            📁 **Filename:** `${{ steps.download-file.outputs.filename }}`
 
-            Direct download link:
-
+            📥 **Direct download link:**
+            
             https://github.com/${{ github.repository }}/raw/main/downloads/${{ steps.download-file.outputs.filename }}
 
-            Time remaining until cleanup: End of today (23:59 UTC)
-
-            *This message was sent by the downloader bot.*
+            ⏰ Time remaining until cleanup: End of today (23:59 UTC)
+            
+            ---
+            *🤖 This message was sent by the downloader bot.*
 
       - name: Close Issue
         if: steps.download-file.outputs.filename != ''
         uses: peter-evans/close-issue@v3
         with:
           issue-number: ${{ github.event.issue.number }}
-          comment: "Request processed successfully and Issue closed."
+          comment: "✅ Request processed successfully and Issue closed."
 
       - name: Comment error if no link found
         if: steps.get-url.outputs.skip == 'true'
@@ -135,9 +140,10 @@ jobs:
         with:
           issue-number: ${{ github.event.issue.number }}
           body: |
-            ## Error: No link found
-
-            Please create a new Issue with a direct download link.
-            Guide: [Create New Issue](https://github.com/${{ github.repository }}/issues/new?template=download-request.md)
-
-            *This message was sent by the downloader bot.*
+            ## ⚠️ Error: No link found
+            
+            Please create a new Issue with a **direct download link**.
+            [Create New Issue](https://github.com/${{ github.repository }}/issues/new?template=download-request.md)
+            
+            ---
+            *🤖 This message was sent by the downloader bot.*
