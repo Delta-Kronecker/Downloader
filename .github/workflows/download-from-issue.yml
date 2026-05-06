@@ -89,27 +89,22 @@ jobs:
           
           echo "File size: ${SIZE_MB} MB"
 
-      - name: Split large file into ZIP parts
+      - name: Split large file with 7-Zip
         id: split-file
         if: steps.download-file.outputs.size_mb > 90
         env:
           FILENAME: ${{ steps.download-file.outputs.filename }}
         run: |
-          echo "File is larger than 90 MB. Splitting into parts..."
+          echo "File is larger than 90 MB. Splitting with 7-Zip..."
+          
+          sudo apt-get update -qq && sudo apt-get install -y -qq p7zip-full
           
           BASENAME="${FILENAME%.*}"
+          EXT="${FILENAME##*.}"
           SPLIT_DIR="downloads/${BASENAME}_parts"
           mkdir -p "${SPLIT_DIR}"
           
-          gzip -c "downloads/${FILENAME}" > "${SPLIT_DIR}/${FILENAME}.gz"
-          
-          split -b 90M -d "${SPLIT_DIR}/${FILENAME}.gz" "${SPLIT_DIR}/${FILENAME}.part_"
-          
-          rm "${SPLIT_DIR}/${FILENAME}.gz"
-          
-          for part in "${SPLIT_DIR}"/*; do
-            mv "${part}" "${part}.zip"
-          done
+          7z -v90m -mx0 a "${SPLIT_DIR}/${FILENAME}.7z" "downloads/${FILENAME}"
           
           rm "downloads/${FILENAME}"
           
@@ -173,11 +168,13 @@ jobs:
           REPO: ${{ github.repository }}
           SPLIT_DIR: ${{ steps.split-file.outputs.split_dir }}
         run: |
-          echo "## ✅ Large file downloaded and split successfully!" > /tmp/comment-body.md
+          echo "## ✅ Large file downloaded and split with 7-Zip!" > /tmp/comment-body.md
           echo "" >> /tmp/comment-body.md
           echo "📁 **Original filename:** \`${{ steps.download-file.outputs.filename }}\`" >> /tmp/comment-body.md
           echo "" >> /tmp/comment-body.md
           echo "📊 **Original size:** ${{ steps.download-file.outputs.size_mb }} MB" >> /tmp/comment-body.md
+          echo "" >> /tmp/comment-body.md
+          echo "📦 **Parts:** ${{ steps.split-file.outputs.part_count }} files" >> /tmp/comment-body.md
           echo "" >> /tmp/comment-body.md
           echo "---" >> /tmp/comment-body.md
           echo "" >> /tmp/comment-body.md
@@ -190,6 +187,15 @@ jobs:
             echo "" >> /tmp/comment-body.md
           done
           
+          echo "---" >> /tmp/comment-body.md
+          echo "" >> /tmp/comment-body.md
+          echo "### 🔧 How to extract:" >> /tmp/comment-body.md
+          echo "" >> /tmp/comment-body.md
+          echo "1. Download all parts" >> /tmp/comment-body.md
+          echo "2. Put all parts in one folder" >> /tmp/comment-body.md
+          echo "3. Open the smallest file (ends with highest number) with **7-Zip** or **WinRAR**" >> /tmp/comment-body.md
+          echo "4. Extract the original file" >> /tmp/comment-body.md
+          echo "" >> /tmp/comment-body.md
           echo "---" >> /tmp/comment-body.md
           echo "" >> /tmp/comment-body.md
           echo "⏰ Time remaining until cleanup: End of today (23:59 UTC)" >> /tmp/comment-body.md
