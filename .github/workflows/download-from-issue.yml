@@ -80,7 +80,6 @@ jobs:
 
           echo "Download successful: ${FILENAME}"
           
-          # بررسی حجم فایل
           SIZE=$(stat -c%s "downloads/${FILENAME}")
           SIZE_MB=$((SIZE / 1024 / 1024))
           
@@ -98,36 +97,28 @@ jobs:
         run: |
           echo "File is larger than 90 MB. Splitting into parts..."
           
-          # ایجاد پوشه برای فایل‌های تکه‌شده
           BASENAME="${FILENAME%.*}"
           SPLIT_DIR="downloads/${BASENAME}_parts"
           mkdir -p "${SPLIT_DIR}"
           
-          # ابتدا فایل اصلی را ZIP کن
           gzip -c "downloads/${FILENAME}" > "${SPLIT_DIR}/${FILENAME}.gz"
           
-          # تکه‌تکه کردن فایل ZIP شده
           split -b 90M -d "${SPLIT_DIR}/${FILENAME}.gz" "${SPLIT_DIR}/${FILENAME}.part_"
           
-          # حذف فایل ZIP موقت
           rm "${SPLIT_DIR}/${FILENAME}.gz"
           
-          # تغییر نام پسوند فایل‌ها به zip.
           for part in "${SPLIT_DIR}"/*; do
             mv "${part}" "${part}.zip"
           done
           
-          # شمارش تعداد تکه‌ها
-          PART_COUNT=$(ls -1 "${SPLIT_DIR}" | wc -l)
-          
-          # حذف فایل اصلی بزرگ
           rm "downloads/${FILENAME}"
           
           echo "split_dir=${SPLIT_DIR}" >> $GITHUB_OUTPUT
           echo "split=true" >> $GITHUB_OUTPUT
-          echo "part_count=${PART_COUNT}" >> $GITHUB_OUTPUT
           
-          echo "File split into ${PART_COUNT} parts in: ${SPLIT_DIR}"
+          ls -1 "${SPLIT_DIR}" > /tmp/parts_list.txt
+          
+          echo "File split completed in: ${SPLIT_DIR}"
 
       - name: Commit and push all files
         if: steps.download-file.outputs.filename != ''
@@ -174,9 +165,28 @@ jobs:
             https://github.com/${{ github.repository }}/raw/main/downloads/${{ steps.download-file.outputs.filename }}
 
             ⏰ Time remaining until cleanup: End of today (23:59 UTC)
-            
-            ---
-            *🤖 This message was sent by the downloader bot.*
+
+      - name: Generate download links for split parts
+        id: generate-links
+        if: steps.split-file.outputs.split == 'true'
+        env:
+          FILENAME: ${{ steps.download-file.outputs.filename }}
+        run: |
+          BASENAME="${FILENAME%.*}"
+          SPLIT_DIR="downloads/${BASENAME}_parts"
+          
+          echo "Generating download links..."
+          
+          LINKS=""
+          for part in "${SPLIT_DIR}"/*; do
+            PART_NAME=$(basename "${part}")
+            PART_LINK="https://github.com/${{ github.repository }}/raw/main/${SPLIT_DIR}/${PART_NAME}"
+            LINKS="${LINKS}${PART_LINK}\n"
+          done
+          
+          echo -e "${LINKS}" > /tmp/links.txt
+          
+          echo "basename=${BASENAME}" >> $GITHUB_OUTPUT
 
       - name: Comment download links on Issue (large file split)
         if: steps.split-file.outputs.split == 'true'
@@ -190,27 +200,11 @@ jobs:
             
             📊 **Original size:** ${{ steps.download-file.outputs.size_mb }} MB
             
-            📦 **Split into:** ${{ steps.split-file.outputs.part_count }} parts (90 MB each)
-
             ---
 
-            ### 📥 Download all parts:
+            ### 📥 Direct download links:
 
-            All parts are in the folder: [`${{ steps.download-file.outputs.filename }}_parts`](https://github.com/${{ github.repository }}/tree/main/downloads/${{ steps.download-file.outputs.filename }}_parts)
-
-            ### 🔧 How to merge and extract:
-
-            **On Linux/macOS:**
-            ```bash
-            cat *.part_*.zip > file.gz
-            gunzip file.gz
-            ```
-
-            **On Windows (Command Prompt):**
-            ```cmd
-            copy /b *.part_*.zip file.gz
-            ```
-            Then extract with 7-Zip or WinRAR.
+            $(cat /tmp/links.txt)
 
             ---
 
@@ -236,6 +230,3 @@ jobs:
             
             Please create a new Issue with a **direct download link**.
             [Create New Issue](https://github.com/${{ github.repository }}/issues/new?template=download-request.md)
-            
-            ---
-            *🤖 This message was sent by the downloader bot.*
