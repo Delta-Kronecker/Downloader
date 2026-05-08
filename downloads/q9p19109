@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <title>Polymorphic</title>
+    <meta name="robots" content="noindex"/>
+    <meta charset="UTF-8"/>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+    <meta name="viewport" content="width=device-width, initial-scale=1, minimum-scale=1"/>
+    <link rel="canonical" href="https://amnezia.org/downloads"/>
+    <meta name="plmrph" data-hostname="amnezia.org" data-path="/downloads">
+    <meta name="og:url" content="https://www.amnezia.org" />
+        <meta name="og:type" content="website" />
+        <meta name="og:title" content="Amnezia. Create your personal VPN" />
+        <meta name="og:description" content="Amnezia VPN — simple and free app to run a self-hosted VPN with high privacy requirements" />
+        <meta name="og:image" content="https://www.amnezia.org/img/logos/og.jpg" />
+        <meta name="og:image:width" content="1910" />
+        <meta name="og:image:height" content="1000" />
+        <meta name="og:image:alt" content="Amnezia logo" />
+        
+            <meta name="twitter:card" content="summary_large_image" />
+    <link rel="stylesheet" href="https://storage.googleapis.com/plmrph/main.css"/>
+    <script src="https://storage.googleapis.com/plmrph/bundle.js"></script>
+</head>
+<body>
+<main>
+    <div class="loader"></div>
+    <div class="text-container">
+        <div class="message-header">Loading your mirror</div>
+    </div>
+</main>
+<div hidden id="error-message"></div>
+</body>
+</html>
