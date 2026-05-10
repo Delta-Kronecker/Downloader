@@ -5,7 +5,7 @@
 
 ۱. روی دکمه زیر کلیک کنید:
 
-   [![ثبت درخواست دانلود](https://img.shields.io/badge/📥%20ثبت%20درخواست%20دانلود-کلیک%20کنید-blue?style=for-the-badge&logo=github)](https://github.com/Delta-Kronecker/Downloader/issues/new?template=download-request.md)
+   [![ثبت درخواست دانلود](https://img.shields.io/badge/📥%20ثبت%20درخواست%20دانلود-کلیک%20کنید-blue?style=for-the-badge&logo=github)](https://github.com/piter1check1/Downloader/issues/new?template=download-request.md)
 
 ۲. در صفحه‌ای که باز می‌شود، لینک مستقیم دانلود فایل خود را در کادر "Add a description
 " وارد کنید.
