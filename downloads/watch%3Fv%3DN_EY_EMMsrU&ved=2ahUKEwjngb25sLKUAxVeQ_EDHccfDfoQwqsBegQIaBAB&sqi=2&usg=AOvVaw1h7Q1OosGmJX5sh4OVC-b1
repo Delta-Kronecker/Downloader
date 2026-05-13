@@ -1,3 +1,0 @@
-<html lang="en"> <head>   <script nonce="n19JvuWCLdKhC1L01h4Rrw">window.google = {};(function(){
-var d=/^\s*(?!javascript:)(?:[\w+.-]+:|[^:/?#]*(?:[/?#]|$))/i;
-(this||self).google.navigateTo=function(a,c,b){!/\/.*?[&?]gsc=1/.test(c.location.href)&&a!==c&&a.google?a.google.r&&(a.google.r=0,a=a.location,b=d.test(b)?b:void 0,b!==void 0&&(a.href=b),c.location.replace("about:blank")):c.location.replace(b)};}).call(this);(function(){var redirectUrl='https://www.youtube.com/watch?v\x3dN_EY_EMMsrU';google.navigateTo(parent,window,redirectUrl);})();</script> <noscript> <meta content="0;url=https://www.youtube.com/watch?v=N_EY_EMMsrU" http-equiv="refresh"> </noscript> </head>  </html>
